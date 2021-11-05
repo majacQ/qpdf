@@ -139,7 +139,7 @@ foreach my $c (@completion_tests)
 show_ntests();
 # ----------
 $td->notify("--- Argument Parsing ---");
-$n_tests += 6;
+$n_tests += 9;
 
 $td->runtest("required argument",
              {$td->COMMAND => "qpdf --password minimal.pdf"},
@@ -169,6 +169,21 @@ $td->runtest("missing underlay filename",
 $td->runtest("extra overlay filename",
              {$td->COMMAND => "qpdf --overlay x x --"},
              {$td->REGEXP => ".*overlay file already specified.*",
+                  $td->EXIT_STATUS => 2},
+             $td->NORMALIZE_NEWLINES);
+$td->runtest("multiple pages options",
+             {$td->COMMAND => "qpdf --pages . -- --pages . --"},
+             {$td->REGEXP => ".*--pages may only be specified one time.*",
+                  $td->EXIT_STATUS => 2},
+             $td->NORMALIZE_NEWLINES);
+$td->runtest("bad numeric range detects unclosed --pages",
+             {$td->COMMAND => "qpdf --pages . --pages . --"},
+             {$td->REGEXP => ".*--pages option must be terminated with --.*",
+                  $td->EXIT_STATUS => 2},
+             $td->NORMALIZE_NEWLINES);
+$td->runtest("bad file detected as unclosed --pages",
+             {$td->COMMAND => "qpdf --pages . 1 --xyz out"},
+             {$td->REGEXP => ".*--pages option must be terminated with --.*",
                   $td->EXIT_STATUS => 2},
              $td->NORMALIZE_NEWLINES);
 
@@ -462,7 +477,7 @@ $td->runtest("compare files",
 show_ntests();
 # ----------
 $td->notify("--- Form XObject, underlay, overlay ---");
-$n_tests += 20;
+$n_tests += 22;
 
 $td->runtest("form xobject creation",
              {$td->COMMAND => "test_driver 55 fxo-red.pdf"},
@@ -535,6 +550,15 @@ $td->runtest("page operations on form xobject",
              {$td->FILE => "page-ops-on-form-xobject.out",
                   $td->EXIT_STATUS => 0},
              $td->NORMALIZE_NEWLINES);
+$td->runtest("overlay on page with no resources",
+             {$td->COMMAND =>
+                  "qpdf --deterministic-id page-with-no-resources.pdf" .
+                  " --overlay minimal.pdf -- a.pdf"},
+             {$td->STRING => "", $td->EXIT_STATUS => 0},
+             $td->NORMALIZE_NEWLINES);
+$td->runtest("check overlay with no resources output",
+             {$td->FILE => "a.pdf"},
+             {$td->FILE => "overlay-no-resources.pdf"});
 
 show_ntests();
 # ----------
@@ -1001,7 +1025,7 @@ my @bug_tests = (
     ["335a", "ozz-fuzz-12152", 2],
     ["335b", "ozz-fuzz-14845", 2],
     ["fuzz-16214", "stream in object stream", 3, "--preserve-unreferenced"],
-    # When adding to this list, consider adding to SEED_CORPUS_FILES
+    # When adding to this list, consider adding to CORPUS_FROM_TEST
     # in fuzz/build.mk and updating the count in fuzz/qtest/fuzz.test.
     );
 $n_tests += scalar(@bug_tests);
@@ -3493,7 +3517,7 @@ for (my $n = 16; $n <= 19; ++$n)
 show_ntests();
 # ----------
 $td->notify("--- Specific File Tests ---");
-$n_tests += 9;
+$n_tests += 11;
 
 # Special PDF files that caused problems at some point
 
@@ -3532,6 +3556,15 @@ $td->runtest("pages points to page",
 $td->runtest("check output",
 	     {$td->FILE => "a.pdf"},
 	     {$td->FILE => "pages-is-page-out.pdf"});
+$td->runtest("Acroform /DR with indirect subkey",
+             {$td->COMMAND =>
+                  "qpdf --static-id --empty" .
+                  " --pages dr-with-indirect-item.pdf -- a.pdf"},
+             {$td->STRING => "", $td->EXIT_STATUS => 0},
+             $td->NORMALIZE_NEWLINES);
+$td->runtest("check output",
+	     {$td->FILE => "a.pdf"},
+	     {$td->FILE => "dr-with-indirect-item-out.pdf"});
 
 show_ntests();
 # ----------

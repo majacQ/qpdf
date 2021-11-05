@@ -25,7 +25,7 @@
   <para>
    QPDF is a program that does structural, content-preserving
    transformations on PDF files.  QPDF's website is located at <ulink
-   url="http://qpdf.sourceforge.net/">http://qpdf.sourceforge.net/</ulink>.
+   url="https://qpdf.sourceforge.io/">https://qpdf.sourceforge.io/</ulink>.
    QPDF's source code is hosted on github at <ulink
    url="https://github.com/qpdf/qpdf">https://github.com/qpdf/qpdf</ulink>.
   </para>
@@ -1698,9 +1698,10 @@ make
 </programlisting>
     If you wanted to take pages 1&ndash;5 from
     <filename>file1.pdf</filename> and pages 11&ndash;15 from
-    <filename>file2.pdf</filename> in reverse, you would run
+    <filename>file2.pdf</filename> in reverse, taking document-level
+    metadata from <filename>file2.pdf</filename>, you would run
 
-    <programlisting><command>qpdf</command> <option>file1.pdf --pages file1.pdf 1-5 . 15-11 -- outfile.pdf</option>
+    <programlisting><command>qpdf</command> <option>file2.pdf --pages file1.pdf 1-5 . 15-11 -- outfile.pdf</option>
 </programlisting>
     If, for some reason, you wanted to take the first page of an
     encrypted file called <filename>encrypted.pdf</filename> with
@@ -2943,7 +2944,12 @@ outfile.pdf</option>
         recover, after which other options are effectively operating
         on the recovered file. Combining <option>--check</option> with
         other options in this way can be useful for manually
-        recovering severely damaged files.
+        recovering severely damaged files. Note that
+        <option>--check</option> produces no output to standard output
+        when everything is valid, so if you are using this to
+        programmatically validate files in bulk, it is safe to run
+        without output redirected to <filename>/dev/null</filename>
+        and just check for a 0 exit code.
        </para>
       </listitem>
      </varlistentry>
@@ -5061,6 +5067,93 @@ print "\n";
    </varlistentry>
 -->
    <varlistentry>
+    <term>10.4.0: Month dd, YYYY</term>
+    <listitem>
+     <itemizedlist>
+      <listitem>
+       <para>
+        Bug Fixes
+       </para>
+       <itemizedlist>
+        <listitem>
+         <para>
+          Fix potential bounds error when handling shell completion
+          that could occur when given bogus input.
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          Properly handle overlay/underlay on completely empty pages
+          (with no resource dictionary).
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          Fix crash that could occur under certain conditions when
+          using <option>--pages</option> with files that had form
+          fields.
+         </para>
+        </listitem>
+       </itemizedlist>
+      </listitem>
+      <listitem>
+       <para>
+        Library Enhancements
+       </para>
+       <itemizedlist>
+        <listitem>
+         <para>
+          Make <function>QPDF::findPage</function> functions public.
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          Add methods to <classname>Pl_Flate</classname> to be able to
+          receive warnings on certain recoverable conditions.
+         </para>
+        </listitem>
+        <listitem>
+         <para>
+          Add an extra check to the library to detect when foreign
+          objects are inserted directly (instead of using
+          <function>QPDF::copyForeignObject</function>) at the time of
+          insertion rather than when the file is written. Catching the
+          error sooner makes it much easier to locate the incorrect
+          code.
+         </para>
+        </listitem>
+       </itemizedlist>
+      </listitem>
+      <listitem>
+       <para>
+        CLI Enhancements
+       </para>
+       <itemizedlist>
+        <listitem>
+         <para>
+          Improve diagnostics around parsing <option>--pages</option>
+          command-line options
+         </para>
+        </listitem>
+       </itemizedlist>
+      </listitem>
+      <listitem>
+       <para>
+        Packaging Changes
+       </para>
+       <itemizedlist>
+        <listitem>
+         <para>
+          The Windows binary distribution is now built with crypto
+          provided by OpenSSL 3.0.
+         </para>
+        </listitem>
+       </itemizedlist>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
     <term>10.3.2: May 8, 2021</term>
     <listitem>
      <itemizedlist>
@@ -6623,7 +6716,7 @@ print "\n";
           added to return an unsigned value. This makes it easier to
           write code that is safe from unintentional data loss.
           Functions: <function>getUIntValue</function>,
-          <function>getIntVauleAsInt</function>,
+          <function>getIntValueAsInt</function>,
           <function>getUIntValueAsUInt</function>.
          </para>
         </listitem>
