@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:xenial-20210416
 RUN apt-get update && \
     apt-get -y install screen autoconf git sudo \
        build-essential zlib1g-dev libjpeg-dev libgnutls28-dev \
